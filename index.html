@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media Sentiment and Stock Performance</title>
+
+    <!-- Dependencies -->
+    <script src="lib/d3.v5.min.js"></script>
+    <script src="https://unpkg.com/d3-simple-slider"></script>
+    <script src="lib/d3-tip.min.js"></script>
+    <script src="lib/colorbrewer.min.js"></script>
+    <script src="lib/d3-legend.min.js"></script>
+    <!-- Load d3-cloud for word cloud-->
+    <script src="https://cdn.jsdelivr.net/gh/holtzy/D3-graph-gallery@master/LIB/d3.layout.cloud.js"></script>
+
+    <!-- styling  -->
+    <style type="text/css">
+        body {
+        font-family: Arial, Helvetica, sans-serif;
+        }
+
+        #slider-container {
+            position: relative;
+            height:30px;
+            background-color: #eeeef5;
+        }
+
+        h1 {
+            font-size: 20px;
+        }
+
+        h2 {
+            font-size: 18px;
+        }
+
+        h3 {
+            font-size: 16px;
+        }
+
+        p {
+            font-size: 14px;
+        }
+
+        .container-name-dropdown {
+            position: relative;
+            top:30px;
+            background-color: #FFA500;
+        }
+
+        .container-stock {
+            position: relative;
+            height:200px;
+            top:10px;
+        }
+
+        .container-sentiment {
+            position: relative;
+            height:200px;
+            top:10px;
+        }
+
+        .container-wordcloud {
+            position: relative;
+            height:200px;
+            top:10px;
+        }
+
+        .container-tweet {
+            position: relative;
+            height:200px;
+            top:10px;
+        }
+
+        .container-subtitle {
+            position: relative;
+            top:30px;
+            background-color: rgb(120, 187, 241);
+        }
+
+        div.tooltip {
+            position: absolute;
+            text-align: center;
+            width: 100px;
+            height: auto;
+            padding: 2px;
+            font: 12px sans-serif;
+            background: #FFA07A;
+            border: 0px;
+            border-radius: 8px;
+            opacity: 0.1;
+            overflow-wrap: break-word; 
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        /* Create a two-column layout */
+        .column {
+            float: left;
+            width: 50%;
+            padding: 5px;
+        }
+
+        /* Clear floats after the columns */
+        .comparison::after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+
+    </style>
+
+</head>
+<body>
+    
+
+        <!-- this container include headline, dropdown and slider at the top of the web page -->
+    <div class="container" id="container-head">  
+        <!-- title on the web page -->
+        <h1 id="title">Social Media Sentiment and Stock Performance</h1>
+    
+    </div>
+
+    <div class="comparison">
+        <!-- this container include stock performance, sentiment, wordcloud and tweet data for the company on the left -->
+        <div class="column" id="column-left">
+            <!-- 1st section: include company title & dropdown menu. 
+            On changing company using the dropdown buttom, name, graphs and tables will change accordingly  -->
+            <div class="container-name-dropdown" id="container-name-dropdown-left">APPLE
+                <!-- <h3 id="company-name-left">APPLE</h3> -->
+                <!-- <select id="dropdown-left" style="position:relative; left:210px"></select> -->
+            </div>
+            <!-- 2nd secion: STOCK PERFORMANCE OVER TIME
+            contain the subtitle and graph of stock performance -->
+            <div class="container-stock" id="container-stock-left">
+                <!-- subtitle in blue bar -->
+                <div class="container-subtitle" id="subtitle-stock-left">STOCK PERFORMANCE OVER TIME</div>
+                <!-- add graph in the below tag to show variation of stock over time, 
+                on changing the company, the graph will change accordingly -->
+                <svg class="svg-stock" id="svg-stock-left"></svg>
+            </div>
+            <!-- 3rd secion: SENTIMENT OVER TIME
+            contain the subtitle and graph of sentiment analysis -->
+            <div class="container-sentiment" id="container-sentiment-left">
+                <!-- subtitle in blue bar -->
+                <div class="container-subtitle" id="subtitle-sentiment-left">SENTIMENT OVER TIME</div>
+                <!-- add graph in the below tag to show variation of sentiment over time, 
+                on changing the company, the graph will change accordingly -->
+                <div class="graph" id="graph-sentiment-left">
+                    <svg class="svg-sentiment" id="svg-sentiment-left"></svg>
+                </div>
+                <!-- <img src="" alt="sentiment analysis of the company" id="img-sentiment-left"> -->
+            </div>
+            <!-- 4th secion: WORDCLOUD
+            contain the subtitle and graph of wordcloud analysis -->
+            <div class="container-wordcloud" id="container-wordcloud-left">
+                <!-- subtitle in blue bar -->
+                <div class="container-subtitle" id="subtitle-wordcloud-left">WORDCLOUD</div>
+                <!-- add graph in the below tag to show variation of wordcloud over time, 
+                on changing the company, the graph will change accordingly -->
+                <div class="graph" id="graph-wordcloud-left">
+                    <svg class="svg-wordcloud" id="svg-wordcloud-left"></svg>
+                </div>
+                <!-- <img src="" alt="wordcloud analysis of the company" id="img-wordcloud-left"> -->
+            </div>
+            <!-- 5th secion: TWEET DATA
+            contain the subtitle and graph of tweet -->
+            <div class="container-tweet" id="container-tweet-left">
+                <!-- subtitle in blue bar -->
+                <div class="container-subtitle" id="subtitle-tweet-left">TWEET DATA</div>
+                <!-- add table in the below tag to show variation of tweet data over time, 
+                on changing the company, the table will change accordingly. 
+                Data in one specific time period can be viewed by scrolling up and down of the slider on the right hand size of the table -->
+                <table class="table" id="table-tweet-left"></table>
+            </div>
+
+
+
+        </div>
+
+        <div class="column" id="column-right">
+            <!-- 1st section: include company title & dropdown menu. 
+            On changing company using the dropdown buttom, name, graphs and tables will change accordingly  -->
+            <div class="container-name-dropdown" id="container-name-dropdown-right">SAMSUNG
+                <!-- <h3 id="company-name-left">APPLE</h3> -->
+                <!-- <select id="dropdown-right" style="position:relative; left:210px"></select> -->
+            </div>
+            <!-- 2nd secion: STOCK PERFORMANCE OVER TIME
+            contain the subtitle and graph of stock performance -->
+            <div class="container-stock" id="container-stock-right">
+                <!-- subtitle in blue bar -->
+                <div class="container-subtitle" id="subtitle-stock-right">STOCK PERFORMANCE OVER TIME</div>
+                <!-- add graph in the below tag to show variation of stock over time, 
+                on changing the company, the graph will change accordingly -->
+                <svg id="svg-stock-right"></svg>
+            </div>
+            <!-- 3rd secion: SENTIMENT OVER TIME
+            contain the subtitle and graph of sentiment analysis -->
+            <div class="container-sentiment" id="container-sentiment-right">
+                <!-- subtitle in blue bar -->
+                <div class="container-subtitle" id="subtitle-sentiment-right">SENTIMENT OVER TIME</div>
+                <!-- add graph in the below tag to show variation of sentiment over time, 
+                on changing the company, the graph will change accordingly -->
+                <div class="graph" id="graph-sentiment-right">
+                    <svg class="svg-sentiment" id="svg-sentiment-right"></svg>
+                </div>
+                <!-- <img src="" alt="sentiment analysis of the company" id="img-sentiment-right"> -->
+            </div>
+            <!-- 4th secion: WORDCLOUD
+            contain the subtitle and graph of wordcloud analysis -->
+            <div class="container-wordcloud" id="container-wordcloud-right">
+                <!-- subtitle in blue bar -->
+                <div class="container-subtitle" id="subtitle-wordcloud-right">WORDCLOUD</div>
+                <!-- add graph in the below tag to show variation of wordcloud over time, 
+                on changing the company, the graph will change accordingly -->
+                <div class="graph" id="graph-wordcloud-right">
+                    <svg class="svg-wordcloud" id="svg-wordcloud-right"></svg>
+                </div>
+                <!-- <img src="" alt="wordcloud analysis of the company" id="img-wordcloud-right"> -->
+            </div>
+            <!-- 5th secion: TWEET DATA
+            contain the subtitle and graph of tweet -->
+            <div class="container-tweet" id="container-tweet-right">
+                <!-- subtitle in blue bar -->
+                <div class="container-subtitle" id="subtitle-tweet-right">TWEET DATA</div>
+                <!-- add table in the below tag to show variation of tweet data over time, 
+                on changing the company, the table will change accordingly. 
+                Data in one specific time period can be viewed by scrolling up and down of the slider on the right hand size of the table -->
+                <table class="table" id="table-tweet-right"></table>
+            </div>
+
+
+        </div>
+
+    </div>
+    
+
+    <script type="text/javascript">
+
+        //*************** initialise parameters ******************//
+        //Set parameters for styling position and size 
+        const columnWidth = 600;
+        const sectionHeight = columnWidth * (3/4)
+        const padding = 5;
+        const adj = 20;
+
+        //rearrange the size of subtitle bars and sections
+        document.getElementById("container-name-dropdown-left").style.width = columnWidth + "px";
+        document.getElementById("container-name-dropdown-right").style.width = columnWidth + "px";
+
+        var x1 = document.getElementsByClassName("container-subtitle");
+        var i;
+        for (i = 0; i < x1.length; i++) {
+            x1[i].style.width = columnWidth + "px";
+        };
+
+        var sectionName = ['stock', 'sentiment', 'wordcloud', 'tweet']; 
+
+        for (i = 0; i < sectionName.length; i++) {
+            x2 = document.getElementsByClassName("container-"+ sectionName[i])
+            for (j=0; j < x2.length; j++) {
+                x2[j].style.height = sectionHeight + "px";
+            }
+        };
+
+        for (i = 0; i < sectionName.length; i++) {
+            x2 = document.getElementsByClassName("container-"+ sectionName[i])
+            for (j=0; j < x2.length; j++) {
+                x2[j].style.width = columnWidth + "px";
+            }
+        };
+
+
+
+        // Set the dimensions and margins of the graphs/charts
+        var margin = {top: 50, right: 50, bottom: 50, left: 50};
+        var width = columnWidth - margin.left - margin.right,
+            height = sectionHeight - margin.top - margin.bottom;
+
+        // Parse and format the dates
+        const parseDate = d3.timeParse("%d-%m-%Y"),
+        formatDate = d3.timeFormat("%b %y"),
+        formatMonth = d3.timeFormat("%b");
+        formatTime = d3.timeFormat('%e %b %y');
+        const TableformatTime = d3.timeFormat('%e %b %Y');   //formate time for table
+
+
+
+    </script>
+        
+    <!-- load js files to the body -->
+
+    <script type="text/javascript" src='line_chart_apple.js'></script>
+    <script type="text/javascript" src='line_chart_samsung.js'></script>
+    <script type="text/javascript" src='sentiment_apple.js'></script>
+    <script type="text/javascript" src='sentiment_samsung.js'></script>
+    <script type="text/javascript" src='wordcloud_apple.js'></script>
+    <script type="text/javascript" src='wordcloud_samsung.js'></script>
+    <script type="text/javascript" src='table_apple.js'></script>
+    <script type="text/javascript" src='table_samsung.js'></script>
+
+    <!-- bottom line:  load js files to the body -->
+
+    
+</body>
+</html>
